@@ -1,186 +1,856 @@
 <!doctype html>
-<html lang="es" data-theme="dark">
+<html lang="es">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Lista de Precios</title>
+  <title>Los Notables - Precios</title>
   <style>
-    :root{
-      --bg:#0f172a; --card:#111a2e; --line:#1e2a44;
-      --txt:#e2e8f0; --muted:#9fb3d1; --accent:#57b285; --hi:#f9f871;
-      --radius:12px;
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --primary-light: #818cf8;
+      --secondary: #ec4899;
+      --accent: #14b8a6;
+      --bg-main: #0f0f23;
+      --bg-card: #1a1a2e;
+      --bg-elevated: #232342;
+      --text-primary: #f0f0f5;
+      --text-secondary: #a0a0b8;
+      --text-muted: #6b6b8c;
+      --border: rgba(139, 92, 246, 0.15);
+      --glow: rgba(99, 102, 241, 0.3);
+      --success: #10b981;
+      --warning: #f59e0b;
     }
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--txt);}
-    .wrap{max-width:1100px;margin:0 auto;padding:18px;}
-    .toolbar{
-      background:linear-gradient(var(--bg), rgba(38,70,123,.85));
-      border:1px solid var(--line); border-radius:var(--radius);
-      padding:14px; display:grid; grid-template-columns:2fr 1fr; gap:10px;
-      position:sticky; top:10px; z-index:10;
-      box-shadow:0 10px 30px rgba(0,0,0,.25);
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    .card{
-      margin-top:14px; background:rgba(17,26,46,.75);
-      border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-main);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      background-image: 
+        radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.08) 0%, transparent 50%);
+      background-attachment: fixed;
     }
-    label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px;}
-    input,select{
-      width:100%; box-sizing:border-box; padding:10px 12px;
-      border-radius:10px; border:1px solid rgba(255,255,255,.12);
-      background:#142447; color:var(--txt); outline:none;
+    
+    /* Animated gradient background */
+    .bg-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0.4;
+      background: linear-gradient(135deg, 
+        rgba(99, 102, 241, 0.1) 0%, 
+        transparent 50%, 
+        rgba(20, 184, 166, 0.1) 100%);
+      animation: gradientShift 15s ease infinite;
     }
-    input:focus,select:focus{border-color:rgba(87,178,133,.65); box-shadow:0 0 0 3px rgba(87,178,133,.15);}
-    .meta{padding:10px 14px;color:var(--muted);font-size:12px;border-bottom:1px solid var(--line);}
-    table{width:100%;border-collapse:collapse;}
-    th,td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06);text-align:left;}
-    th{color:var(--muted);font-size:12px;font-weight:650;letter-spacing:.3px;}
-    td.right{text-align:right;}
-    .group{
-      background:rgba(30,41,59,.35);
-      color:var(--hi);
-      font-weight:750;
-      border-top:1px solid rgba(255,255,255,.06);
+    
+    @keyframes gradientShift {
+      0%, 100% { transform: translateX(0) translateY(0); }
+      50% { transform: translateX(50px) translateY(30px); }
     }
-    .footer{padding:12px;text-align:center;color:var(--muted);font-size:12px;}
-    .error{padding:18px;color:#fca5a5;}
-    @media (max-width:720px){
-      .toolbar{grid-template-columns:1fr;}
-      th:nth-child(1),td:nth-child(1){display:none;} /* ocultar código en móvil si querés */
+    
+    /* Top Bar */
+    .top-bar {
+      background: rgba(26, 26, 46, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+    }
+    
+    .top-bar-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+    
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .brand-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 800;
+      color: white;
+      box-shadow: 0 4px 16px var(--glow);
+    }
+    
+    .brand-text h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 0;
+    }
+    
+    .brand-text p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+    
+    .stats {
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+    
+    .stat-item {
+      text-align: right;
+    }
+    
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+    }
+    
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+    
+    /* Container */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+    
+    /* Search Panel */
+    .search-panel {
+      background: rgba(26, 26, 46, 0.6);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      margin-bottom: 32px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+    
+    .search-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr auto;
+      gap: 16px;
+      align-items: end;
+    }
+    
+    .input-wrapper {
+      position: relative;
+    }
+    
+    .input-wrapper label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .input-wrapper input,
+    .input-wrapper select {
+      width: 100%;
+      padding: 14px 20px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text-primary);
+      font-size: 1rem;
+      font-family: inherit;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .input-wrapper input:focus,
+    .input-wrapper select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px var(--glow), 0 4px 16px rgba(99, 102, 241, 0.2);
+      background: var(--bg-card);
+    }
+    
+    .input-wrapper input::placeholder {
+      color: var(--text-muted);
+    }
+    
+    .search-icon {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+    
+    .clear-btn {
+      padding: 14px 28px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .clear-btn:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px var(--glow);
+    }
+    
+    /* Grid Layout */
+    .products-grid {
+      display: grid;
+      gap: 16px;
+    }
+    
+    /* Rubro Section */
+    .rubro-section {
+      background: rgba(26, 26, 46, 0.5);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .rubro-section:hover {
+      border-color: var(--primary-light);
+      box-shadow: 0 8px 32px rgba(99, 102, 241, 0.2);
+    }
+    
+    .rubro-header {
+      padding: 20px 28px;
+      background: linear-gradient(135deg, 
+        rgba(99, 102, 241, 0.15) 0%, 
+        rgba(139, 92, 246, 0.15) 100%);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.3s ease;
+    }
+    
+    .rubro-header:hover {
+      background: linear-gradient(135deg, 
+        rgba(99, 102, 241, 0.25) 0%, 
+        rgba(139, 92, 246, 0.25) 100%);
+    }
+    
+    .rubro-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .rubro-title h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin: 0;
+      color: var(--text-primary);
+    }
+    
+    .rubro-badge {
+      background: var(--primary);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      box-shadow: 0 2px 8px var(--glow);
+    }
+    
+    .rubro-toggle {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+    
+    .rubro-toggle::after {
+      content: '▼';
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      transition: transform 0.3s ease;
+    }
+    
+    .rubro-section.collapsed .rubro-toggle::after {
+      transform: rotate(-90deg);
+    }
+    
+    .rubro-content {
+      max-height: 5000px;
+      overflow: hidden;
+      transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .rubro-section.collapsed .rubro-content {
+      max-height: 0;
+    }
+    
+    .products-list {
+      padding: 8px;
+    }
+    
+    /* Product Card */
+    .product-card {
+      display: grid;
+      grid-template-columns: 100px 1fr 140px;
+      gap: 20px;
+      align-items: center;
+      padding: 16px 20px;
+      margin: 8px 0;
+      background: rgba(35, 35, 66, 0.4);
+      border: 1px solid transparent;
+      border-radius: 12px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .product-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(180deg, var(--primary), var(--accent));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .product-card:hover {
+      background: rgba(35, 35, 66, 0.8);
+      border-color: var(--border);
+      transform: translateX(8px);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    .product-card:hover::before {
+      opacity: 1;
+    }
+    
+    .product-code {
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: rgba(0, 0, 0, 0.3);
+      padding: 6px 10px;
+      border-radius: 6px;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+    
+    .product-name {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      line-height: 1.4;
+    }
+    
+    .product-price {
+      text-align: right;
+      font-size: 1.4rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--success));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-variant-numeric: tabular-nums;
+    }
+    
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      color: var(--text-muted);
+    }
+    
+    .empty-icon {
+      font-size: 5rem;
+      margin-bottom: 20px;
+      opacity: 0.3;
+    }
+    
+    .empty-state h3 {
+      font-size: 1.5rem;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+    
+    .empty-state p {
+      font-size: 1rem;
+      color: var(--text-muted);
+    }
+    
+    /* Loading */
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 100px 20px;
+      gap: 24px;
+    }
+    
+    .loader {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(99, 102, 241, 0.2);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .loading-text {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    /* Error */
+    .error-container {
+      background: rgba(239, 68, 68, 0.1);
+      border: 2px solid rgba(239, 68, 68, 0.3);
+      border-radius: 16px;
+      padding: 32px;
+      margin: 32px 0;
+      text-align: center;
+    }
+    
+    .error-icon {
+      font-size: 4rem;
+      margin-bottom: 16px;
+    }
+    
+    .error-container h3 {
+      color: #f87171;
+      margin-bottom: 12px;
+      font-size: 1.5rem;
+    }
+    
+    .error-container p {
+      color: var(--text-secondary);
+      font-size: 1rem;
+    }
+    
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 48px 24px;
+      margin-top: 48px;
+      border-top: 1px solid var(--border);
+    }
+    
+    .footer-content {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    
+    .footer-brand {
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .stats {
+        display: none;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .top-bar-content {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .search-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .clear-btn {
+        width: 100%;
+      }
+      
+      .product-card {
+        grid-template-columns: 70px 1fr 110px;
+        gap: 12px;
+        padding: 12px 16px;
+      }
+      
+      .product-code {
+        font-size: 0.75rem;
+        padding: 4px 6px;
+      }
+      
+      .product-name {
+        font-size: 0.9rem;
+      }
+      
+      .product-price {
+        font-size: 1.1rem;
+      }
+      
+      .rubro-title h3 {
+        font-size: 1rem;
+      }
+    }
+    
+    /* Scroll behavior */
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: var(--bg-main);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, var(--primary), var(--secondary));
+      border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--primary-light);
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="toolbar">
-      <div>
-        <label>Buscar (código / producto / rubro)</label>
-        <input id="q" placeholder="Ej: azúcar, coca, A101..." />
+  <div class="bg-animation"></div>
+  
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="top-bar-content">
+      <div class="brand">
+        <div class="brand-icon">LN</div>
+        <div class="brand-text">
+          <h1>Los Notables</h1>
+          <p>Lista de Precios Actualizada</p>
+        </div>
       </div>
-      <div>
-        <label>Rubro</label>
-        <select id="rubro"><option value="">Todos</option></select>
+      <div class="stats">
+        <div class="stat-item">
+          <div class="stat-value" id="totalProducts">0</div>
+          <div class="stat-label">Productos</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="totalCategories">0</div>
+          <div class="stat-label">Categorías</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="container">
+    <!-- Search Panel -->
+    <div class="search-panel">
+      <div class="search-grid">
+        <div class="input-wrapper">
+          <label>Buscar producto</label>
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="Nombre, código o categoría..."
+            autocomplete="off"
+          />
+        </div>
+        <div class="input-wrapper">
+          <label>Categoría</label>
+          <select id="categoryFilter">
+            <option value="">Todas las categorías</option>
+          </select>
+        </div>
+        <button class="clear-btn" id="clearBtn">Limpiar</button>
       </div>
     </div>
 
-    <div class="card">
-      <div class="meta" id="meta">Cargando…</div>
-      <table>
-        <thead>
-          <tr>
-            <th style="width:110px;">Código</th>
-            <th>Producto</th>
-            <th style="width:220px;">Rubro</th>
-            <th class="right" style="width:140px;">Precio</th>
-          </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-      </table>
-      <div class="footer">Design by SmartDom</div>
+    <!-- Products Grid -->
+    <div class="products-grid" id="productsGrid">
+      <div class="loading-container">
+        <div class="loader"></div>
+        <div class="loading-text">Cargando productos...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-content">
+      Diseñado con ❤️ por <span class="footer-brand">SmartDom</span>
     </div>
   </div>
 
   <script>
-    // ✅ Tu Apps Script URL
+    // API Configuration
     const API_URL = "https://script.google.com/macros/s/AKfycbxeO-Q6qo_06hCCiJ6foxLF4WWGWi697TLLEqWffm76lIDciKPDIqbrgEv1utpzb7b9Fw/exec";
+    const TOKEN = new URLSearchParams(window.location.search).get("k") || "losnotables2026";
 
-    const params = new URLSearchParams(window.location.search);
-    const TOKEN = (params.get("k") || "").trim();
+    // DOM Elements
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const clearBtn = document.getElementById('clearBtn');
+    const productsGrid = document.getElementById('productsGrid');
+    const totalProducts = document.getElementById('totalProducts');
+    const totalCategories = document.getElementById('totalCategories');
 
-    const elQ = document.getElementById("q");
-    const elRubro = document.getElementById("rubro");
-    const elBody = document.getElementById("tbody");
-    const elMeta = document.getElementById("meta");
+    // Global State
+    let allProducts = [];
+    let filteredProducts = [];
 
-    let items = [];
-
-    const money = (n) => Number(n || 0).toLocaleString("es-AR", { style:"currency", currency:"ARS" });
-
-    function showFatal(msg){
-      elMeta.textContent = "Acceso restringido";
-      elBody.innerHTML = `<tr><td colspan="4" class="error">${msg}</td></tr>`;
-      throw new Error(msg);
+    // Format price
+    function formatPrice(price) {
+      return new Intl.NumberFormat('es-AR', {
+        style: 'currency',
+        currency: 'ARS',
+        minimumFractionDigits: 2
+      }).format(price || 0);
     }
 
-    if (!TOKEN) {
-      showFatal("Falta el parámetro <b>k</b> en la URL. Usá un link como: <code>?k=TU_TOKEN</code>");
+    // Show error
+    function showError(message) {
+      productsGrid.innerHTML = `
+        <div class="error-container">
+          <div class="error-icon">⚠️</div>
+          <h3>Error al cargar</h3>
+          <p>${message}</p>
+        </div>
+      `;
     }
 
-    function renderGrouped(list){
+    // Group products by category
+    function groupByCategory(products) {
       const groups = new Map();
-      for (const it of list) {
-        const key = (it.rubro || "SIN RUBRO").trim();
-        if (!groups.has(key)) groups.set(key, []);
-        groups.get(key).push(it);
-      }
-
-      let html = "";
-      for (const [rubro, arr] of groups) {
-        html += `<tr class="group"><td colspan="4">${rubro}</td></tr>`;
-        for (const it of arr) {
-          html += `
-            <tr>
-              <td>${it.codigo || ""}</td>
-              <td>${it.producto || ""}</td>
-              <td>${it.rubro || ""}</td>
-              <td class="right">${money(it.precio)}</td>
-            </tr>`;
+      
+      products.forEach(product => {
+        const category = (product.rubro || 'Sin categoría').trim();
+        if (!groups.has(category)) {
+          groups.set(category, []);
         }
-      }
-      elBody.innerHTML = html || `<tr><td colspan="4" style="padding:16px;color:#9fb3d1;">Sin resultados.</td></tr>`;
-      elMeta.textContent = `Mostrando ${list.length} productos (Centro 1 excluido).`;
+        groups.get(category).push(product);
+      });
+      
+      return new Map([...groups.entries()].sort((a, b) => 
+        a[0].localeCompare(b[0], 'es', { sensitivity: 'base' })
+      ));
     }
 
-    function applyFilters(){
-      const q = elQ.value.trim().toLowerCase();
-      const r = elRubro.value.trim().toLowerCase();
+    // Render products
+    function renderProducts(products) {
+      if (products.length === 0) {
+        productsGrid.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🔍</div>
+            <h3>No se encontraron productos</h3>
+            <p>Intenta ajustar los filtros de búsqueda</p>
+          </div>
+        `;
+        updateStats(0, 0);
+        return;
+      }
 
-      const filtered = items.filter(it => {
-        if (r && (it.rubro||"").toLowerCase() !== r) return false;
-        if (q) {
-          const hay = `${it.codigo||""} ${it.producto||""} ${it.rubro||""}`.toLowerCase();
-          if (!hay.includes(q)) return false;
+      const grouped = groupByCategory(products);
+      let html = '';
+
+      grouped.forEach((items, category) => {
+        html += `
+          <div class="rubro-section">
+            <div class="rubro-header" onclick="toggleRubro(this)">
+              <div class="rubro-title">
+                <h3>${category}</h3>
+                <span class="rubro-badge">${items.length}</span>
+              </div>
+              <div class="rubro-toggle"></div>
+            </div>
+            <div class="rubro-content">
+              <div class="products-list">
+                ${items.map(product => `
+                  <div class="product-card">
+                    <div class="product-code">${product.codigo || '---'}</div>
+                    <div class="product-name">${product.producto || 'Sin nombre'}</div>
+                    <div class="product-price">${formatPrice(product.precio)}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      productsGrid.innerHTML = html;
+      updateStats(products.length, grouped.size);
+    }
+
+    // Toggle rubro visibility
+    function toggleRubro(headerElement) {
+      const section = headerElement.parentElement;
+      section.classList.toggle('collapsed');
+    }
+
+    // Update stats
+    function updateStats(productsCount, categoriesCount) {
+      totalProducts.textContent = productsCount;
+      totalCategories.textContent = categoriesCount;
+      
+      // Animate numbers
+      totalProducts.style.transform = 'scale(1.2)';
+      totalCategories.style.transform = 'scale(1.2)';
+      setTimeout(() => {
+        totalProducts.style.transform = 'scale(1)';
+        totalCategories.style.transform = 'scale(1)';
+      }, 200);
+    }
+
+    // Apply filters
+    function applyFilters() {
+      const searchTerm = searchInput.value.trim().toLowerCase();
+      const selectedCategory = categoryFilter.value.trim().toLowerCase();
+
+      filteredProducts = allProducts.filter(product => {
+        // Category filter
+        if (selectedCategory && (product.rubro || '').toLowerCase() !== selectedCategory) {
+          return false;
         }
+
+        // Search filter
+        if (searchTerm) {
+          const searchText = `${product.codigo || ''} ${product.producto || ''} ${product.rubro || ''}`.toLowerCase();
+          if (!searchText.includes(searchTerm)) {
+            return false;
+          }
+        }
+
         return true;
       });
 
-      renderGrouped(filtered);
+      renderProducts(filteredProducts);
     }
 
-    async function load(){
-      elMeta.textContent = "Cargando…";
-
-      const url = new URL(API_URL);
-      url.searchParams.set("k", TOKEN);
-
-      const res = await fetch(url.toString());
-      const data = await res.json();
-
-      if (!data.ok) {
-        showFatal("Token inválido o acceso no autorizado.");
-      }
-
-      items = data.items || [];
-
-      const rubros = [...new Set(items.map(x => (x.rubro||"").trim()).filter(Boolean))]
-        .sort((a,b)=>a.localeCompare(b,"es",{sensitivity:"base"}));
-
-      elRubro.innerHTML =
-        `<option value="">Todos</option>` +
-        rubros.map(r => `<option value="${r}">${r}</option>`).join("");
-
+    // Clear filters
+    function clearFilters() {
+      searchInput.value = '';
+      categoryFilter.value = '';
       applyFilters();
     }
 
-    elQ.addEventListener("input", applyFilters);
-    elRubro.addEventListener("change", applyFilters);
+    // Load data
+    async function loadData() {
+      try {
+        const url = new URL(API_URL);
+        url.searchParams.set('k', TOKEN);
 
-    load().catch(err => {
-      console.error(err);
-      if (!elBody.innerHTML) {
-        elMeta.textContent = "Error";
-        elBody.innerHTML = `<tr><td colspan="4" class="error">Error cargando la lista. Revisá el deploy del Apps Script.</td></tr>`;
+        const response = await fetch(url.toString());
+        const data = await response.json();
+
+        if (!data.ok) {
+          showError('Token inválido o acceso no autorizado');
+          return;
+        }
+
+        allProducts = data.items || [];
+        filteredProducts = allProducts;
+
+        // Populate category filter
+        const categories = [...new Set(allProducts.map(p => (p.rubro || '').trim()).filter(Boolean))]
+          .sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+
+        categoryFilter.innerHTML = `
+          <option value="">Todas las categorías</option>
+          ${categories.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
+        `;
+
+        renderProducts(filteredProducts);
+
+      } catch (error) {
+        console.error('Error:', error);
+        showError('No se pudo conectar con el servidor. Verifica tu conexión.');
       }
-    });
+    }
+
+    // Event listeners
+    searchInput.addEventListener('input', applyFilters);
+    categoryFilter.addEventListener('change', applyFilters);
+    clearBtn.addEventListener('click', clearFilters);
+
+    // Add smooth transitions to stats
+    totalProducts.style.transition = 'transform 0.2s ease';
+    totalCategories.style.transition = 'transform 0.2s ease';
+
+    // Make toggleRubro available globally
+    window.toggleRubro = toggleRubro;
+
+    // Initialize
+    loadData();
   </script>
 </body>
 </html>
