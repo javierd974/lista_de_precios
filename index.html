@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Lista de Precios</title>
+  <style>
+    :root{
+      --bg:#0f172a; --card:#111a2e; --line:#1e2a44;
+      --txt:#e2e8f0; --muted:#9fb3d1; --accent:#57b285; --hi:#f9f871;
+      --radius:12px;
+    }
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--txt);}
+    .wrap{max-width:1100px;margin:0 auto;padding:18px;}
+    .toolbar{
+      background:linear-gradient(var(--bg), rgba(38,70,123,.85));
+      border:1px solid var(--line); border-radius:var(--radius);
+      padding:14px; display:grid; grid-template-columns:2fr 1fr; gap:10px;
+      position:sticky; top:10px; z-index:10;
+      box-shadow:0 10px 30px rgba(0,0,0,.25);
+    }
+    .card{
+      margin-top:14px; background:rgba(17,26,46,.75);
+      border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;
+    }
+    label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px;}
+    input,select{
+      width:100%; box-sizing:border-box; padding:10px 12px;
+      border-radius:10px; border:1px solid rgba(255,255,255,.12);
+      background:#142447; color:var(--txt); outline:none;
+    }
+    input:focus,select:focus{border-color:rgba(87,178,133,.65); box-shadow:0 0 0 3px rgba(87,178,133,.15);}
+    .meta{padding:10px 14px;color:var(--muted);font-size:12px;border-bottom:1px solid var(--line);}
+    table{width:100%;border-collapse:collapse;}
+    th,td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06);text-align:left;}
+    th{color:var(--muted);font-size:12px;font-weight:650;letter-spacing:.3px;}
+    td.right{text-align:right;}
+    .group{
+      background:rgba(30,41,59,.35);
+      color:var(--hi);
+      font-weight:750;
+      border-top:1px solid rgba(255,255,255,.06);
+    }
+    .footer{padding:12px;text-align:center;color:var(--muted);font-size:12px;}
+    .error{padding:18px;color:#fca5a5;}
+    @media (max-width:720px){
+      .toolbar{grid-template-columns:1fr;}
+      th:nth-child(1),td:nth-child(1){display:none;} /* ocultar código en móvil si querés */
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="toolbar">
+      <div>
+        <label>Buscar (código / producto / rubro)</label>
+        <input id="q" placeholder="Ej: azúcar, coca, A101..." />
+      </div>
+      <div>
+        <label>Rubro</label>
+        <select id="rubro"><option value="">Todos</option></select>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="meta" id="meta">Cargando…</div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:110px;">Código</th>
+            <th>Producto</th>
+            <th style="width:220px;">Rubro</th>
+            <th class="right" style="width:140px;">Precio</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div class="footer">Design by SmartDom</div>
+    </div>
+  </div>
+
+  <script>
+    // ✅ Tu Apps Script URL
+    const API_URL = "https://script.google.com/macros/s/AKfycbxeO-Q6qo_06hCCiJ6foxLF4WWGWi697TLLEqWffm76lIDciKPDIqbrgEv1utpzb7b9Fw/exec";
+
+    const params = new URLSearchParams(window.location.search);
+    const TOKEN = (params.get("k") || "").trim();
+
+    const elQ = document.getElementById("q");
+    const elRubro = document.getElementById("rubro");
+    const elBody = document.getElementById("tbody");
+    const elMeta = document.getElementById("meta");
+
+    let items = [];
+
+    const money = (n) => Number(n || 0).toLocaleString("es-AR", { style:"currency", currency:"ARS" });
+
+    function showFatal(msg){
+      elMeta.textContent = "Acceso restringido";
+      elBody.innerHTML = `<tr><td colspan="4" class="error">${msg}</td></tr>`;
+      throw new Error(msg);
+    }
+
+    if (!TOKEN) {
+      showFatal("Falta el parámetro <b>k</b> en la URL. Usá un link como: <code>?k=TU_TOKEN</code>");
+    }
+
+    function renderGrouped(list){
+      const groups = new Map();
+      for (const it of list) {
+        const key = (it.rubro || "SIN RUBRO").trim();
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(it);
+      }
+
+      let html = "";
+      for (const [rubro, arr] of groups) {
+        html += `<tr class="group"><td colspan="4">${rubro}</td></tr>`;
+        for (const it of arr) {
+          html += `
+            <tr>
+              <td>${it.codigo || ""}</td>
+              <td>${it.producto || ""}</td>
+              <td>${it.rubro || ""}</td>
+              <td class="right">${money(it.precio)}</td>
+            </tr>`;
+        }
+      }
+      elBody.innerHTML = html || `<tr><td colspan="4" style="padding:16px;color:#9fb3d1;">Sin resultados.</td></tr>`;
+      elMeta.textContent = `Mostrando ${list.length} productos (Centro 1 excluido).`;
+    }
+
+    function applyFilters(){
+      const q = elQ.value.trim().toLowerCase();
+      const r = elRubro.value.trim().toLowerCase();
+
+      const filtered = items.filter(it => {
+        if (r && (it.rubro||"").toLowerCase() !== r) return false;
+        if (q) {
+          const hay = `${it.codigo||""} ${it.producto||""} ${it.rubro||""}`.toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+        return true;
+      });
+
+      renderGrouped(filtered);
+    }
+
+    async function load(){
+      elMeta.textContent = "Cargando…";
+
+      const url = new URL(API_URL);
+      url.searchParams.set("k", TOKEN);
+
+      const res = await fetch(url.toString());
+      const data = await res.json();
+
+      if (!data.ok) {
+        showFatal("Token inválido o acceso no autorizado.");
+      }
+
+      items = data.items || [];
+
+      const rubros = [...new Set(items.map(x => (x.rubro||"").trim()).filter(Boolean))]
+        .sort((a,b)=>a.localeCompare(b,"es",{sensitivity:"base"}));
+
+      elRubro.innerHTML =
+        `<option value="">Todos</option>` +
+        rubros.map(r => `<option value="${r}">${r}</option>`).join("");
+
+      applyFilters();
+    }
+
+    elQ.addEventListener("input", applyFilters);
+    elRubro.addEventListener("change", applyFilters);
+
+    load().catch(err => {
+      console.error(err);
+      if (!elBody.innerHTML) {
+        elMeta.textContent = "Error";
+        elBody.innerHTML = `<tr><td colspan="4" class="error">Error cargando la lista. Revisá el deploy del Apps Script.</td></tr>`;
+      }
+    });
+  </script>
+</body>
+</html>
